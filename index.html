@@ -745,4 +745,180 @@
         var years3 = calcRemainingYearsForExtras(currentIndex, e3.startIndex, e3.endIndex);
         if (years3 > 0) {
           var annual3 = e3.monthly * 12;
-          var subtotal3 = annual3 * y
+          var subtotal3 = annual3 * years3;
+          total += subtotal3;
+          breakdown.push({
+            label: e3.label,
+            years: years3,
+            annual: annual3,
+            subtotal: subtotal3
+          });
+        }
+      }
+      if (advancedFlags && advancedFlags.lessons) {
+        var e4 = extrasModel.lessons;
+        var years4 = calcRemainingYearsForExtras(currentIndex, e4.startIndex, e4.endIndex);
+        if (years4 > 0) {
+          var annual4 = e4.monthly * 12;
+          var subtotal4 = annual4 * years4;
+          total += subtotal4;
+          breakdown.push({
+            label: e4.label,
+            years: years4,
+            annual: annual4,
+            subtotal: subtotal4
+          });
+        }
+      }
+
+      return { total: total, breakdown: breakdown };
+    }
+
+    function formatManYen(amount) {
+      var man = amount / 10000;
+      return man.toLocaleString("ja-JP", { maximumFractionDigits: 1 }) + "万円";
+    }
+
+    function showError(message) {
+      var errorArea = document.getElementById("error-area");
+      if (!message) {
+        errorArea.style.display = "none";
+        errorArea.textContent = "";
+      } else {
+        errorArea.style.display = "block";
+        errorArea.textContent = message;
+      }
+    }
+
+    function handleCalculate() {
+      var nameInput = document.getElementById("child-name");
+      var gradeSelect = document.getElementById("current-grade");
+      var resultCard = document.getElementById("result-card");
+      var resultMainText = document.getElementById("result-main-text");
+      var resultSubText = document.getElementById("result-sub-text");
+      var breakdownTableBody = document.querySelector("#breakdown-table tbody");
+
+      var rawName = nameInput.value.trim();
+      var childName = rawName || "子ども1";
+
+      var gradeValue = gradeSelect.value;
+      if (!gradeValue) {
+        showError("今の学年を選択してください。");
+        resultCard.style.display = "none";
+        return;
+      }
+      var currentIndex = parseInt(gradeValue, 10);
+
+      showError("");
+
+      // ラジオボタンから学校種別取得
+      var kindergartenType = document.querySelector('input[name="kindergarten-type"]:checked').value;
+      var elementaryType   = document.querySelector('input[name="elementary-type"]:checked').value;
+      var juniorType       = document.querySelector('input[name="junior-type"]:checked').value;
+      var highType         = document.querySelector('input[name="high-type"]:checked').value;
+
+      var config = {
+        kindergartenType: kindergartenType,
+        elementaryType:   elementaryType,
+        juniorHighType:   juniorType,
+        highSchoolType:   highType,
+        universityType:   document.getElementById("sel-university").value,
+        livingType:       document.getElementById("sel-living").value,
+        includeGraduate:  document.getElementById("sel-grad").value === "yes"
+      };
+
+      var advancedFlags = {
+        jukuElem: document.getElementById("opt-juku-elem").checked,
+        jukuJh:   document.getElementById("opt-juku-jh").checked,
+        yobikou:  document.getElementById("opt-yobikou").checked,
+        lessons:  document.getElementById("opt-lessons").checked
+      };
+
+      var result = calculateEducationCost(currentIndex, config, advancedFlags);
+      var total = result.total;
+      var breakdown = result.breakdown;
+
+      resultMainText.innerHTML =
+        '<span class="result-name">' + childName +
+        '</span>がこれから進学した場合の教育費は、' +
+        '<span class="result-highlight">約 ' + formatManYen(total) +
+        '</span>程度と試算されます。';
+
+      var summaryParts = [];
+
+      summaryParts.push(
+        "幼稚園：" + (kindergartenType === "public" ? "公立" : "私立") +
+        " / 小学校：" + (elementaryType === "public" ? "公立" : "私立") +
+        " / 中学校：" + (juniorType === "public" ? "公立" : "私立") +
+        " / 高校：" + (highType === "public" ? "公立" : "私立")
+      );
+
+      if (config.universityType === "none") {
+        summaryParts.push("大学：進学しない想定");
+      } else if (config.universityType === "national") {
+        summaryParts.push("大学：国公立");
+      } else if (config.universityType === "private_arts") {
+        summaryParts.push("大学：私立文系");
+      } else if (config.universityType === "private_science") {
+        summaryParts.push("大学：私立理系");
+      }
+
+      if (config.universityType !== "none") {
+        if (config.livingType === "home") {
+          summaryParts.push("居住：自宅通学");
+        } else if (config.livingType === "local_rent") {
+          summaryParts.push("居住：地方都市一人暮らし");
+        } else if (config.livingType === "tokyo_rent") {
+          summaryParts.push("居住：首都圏一人暮らし");
+        }
+      }
+
+      if (config.includeGraduate) {
+        summaryParts.push("大学院：進学あり（2年）");
+      } else {
+        summaryParts.push("大学院：進学なし");
+      }
+
+      resultSubText.textContent = summaryParts.join(" / ");
+
+      breakdownTableBody.innerHTML = "";
+      if (!breakdown || breakdown.length === 0) {
+        var trEmpty = document.createElement("tr");
+        var tdEmpty = document.createElement("td");
+        tdEmpty.colSpan = 4;
+        tdEmpty.style.textAlign = "center";
+        tdEmpty.textContent = "これからかかる教育費は、選択された条件ではほとんどありません。";
+        trEmpty.appendChild(tdEmpty);
+        breakdownTableBody.appendChild(trEmpty);
+      } else {
+        for (var i = 0; i < breakdown.length; i++) {
+          var row = breakdown[i];
+          var tr = document.createElement("tr");
+
+          var tdLabel = document.createElement("td");
+          tdLabel.textContent = row.label;
+
+          var tdYears = document.createElement("td");
+          tdYears.textContent = row.years ? (row.years + "年") : "";
+
+          var tdAnnual = document.createElement("td");
+          tdAnnual.textContent = row.annual ? formatManYen(row.annual) : "";
+
+          var tdSubtotal = document.createElement("td");
+          tdSubtotal.textContent = formatManYen(row.subtotal);
+
+          tr.appendChild(tdLabel);
+          tr.appendChild(tdYears);
+          tr.appendChild(tdAnnual);
+          tr.appendChild(tdSubtotal);
+
+          breakdownTableBody.appendChild(tr);
+        }
+      }
+
+      resultCard.style.display = "block";
+      resultCard.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  </script>
+</body>
+</html>
