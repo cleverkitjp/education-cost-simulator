@@ -98,23 +98,6 @@
       background-color: #ffffff;
     }
 
-    .grade-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 8px;
-    }
-
-    .grade-row-label {
-      font-size: 0.85rem;
-      min-width: 60px;
-    }
-
-    .grade-row select {
-      flex: 1;
-    }
-
     .section-label {
       font-size: 0.9rem;
       font-weight: 600;
@@ -161,6 +144,42 @@
       border-color: var(--primary);
       color: var(--primary);
       background-color: #f3f7ff;
+    }
+
+    /* 幼〜高のラジオ行 */
+    .grade-radio-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .grade-radio-label {
+      font-size: 0.85rem;
+      min-width: 70px;
+    }
+
+    .radio-group {
+      display: flex;
+      gap: 8px;
+      flex: 1;
+      justify-content: flex-end;
+    }
+
+    .radio-option {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.8rem;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border-soft);
+      background-color: #fafafa;
+    }
+
+    .radio-option input[type="radio"] {
+      margin: 0;
     }
 
     .advanced-item {
@@ -306,36 +325,60 @@
 
       <div class="section-label">幼稚園〜高校（学校種別）</div>
 
-      <div class="grade-row">
-        <div class="grade-row-label">幼稚園</div>
-        <select id="sel-kindergarten">
-          <option value="public">国公立</option>
-          <option value="private">私立</option>
-        </select>
+      <div class="grade-radio-row">
+        <div class="grade-radio-label">幼稚園</div>
+        <div class="radio-group">
+          <label class="radio-option">
+            <input type="radio" name="kindergarten-type" value="public" checked>
+            <span>国公立</span>
+          </label>
+          <label class="radio-option">
+            <input type="radio" name="kindergarten-type" value="private">
+            <span>私立</span>
+          </label>
+        </div>
       </div>
 
-      <div class="grade-row">
-        <div class="grade-row-label">小学校</div>
-        <select id="sel-elementary">
-          <option value="public">国公立</option>
-          <option value="private">私立</option>
-        </select>
+      <div class="grade-radio-row">
+        <div class="grade-radio-label">小学校</div>
+        <div class="radio-group">
+          <label class="radio-option">
+            <input type="radio" name="elementary-type" value="public" checked>
+            <span>国公立</span>
+          </label>
+          <label class="radio-option">
+            <input type="radio" name="elementary-type" value="private">
+            <span>私立</span>
+          </label>
+        </div>
       </div>
 
-      <div class="grade-row">
-        <div class="grade-row-label">中学校</div>
-        <select id="sel-junior">
-          <option value="public">国公立</option>
-          <option value="private">私立</option>
-        </select>
+      <div class="grade-radio-row">
+        <div class="grade-radio-label">中学校</div>
+        <div class="radio-group">
+          <label class="radio-option">
+            <input type="radio" name="junior-type" value="public" checked>
+            <span>国公立</span>
+          </label>
+          <label class="radio-option">
+            <input type="radio" name="junior-type" value="private">
+            <span>私立</span>
+          </label>
+        </div>
       </div>
 
-      <div class="grade-row">
-        <div class="grade-row-label">高校</div>
-        <select id="sel-high">
-          <option value="public">国公立</option>
-          <option value="private">私立</option>
-        </select>
+      <div class="grade-radio-row">
+        <div class="grade-radio-label">高校</div>
+        <div class="radio-group">
+          <label class="radio-option">
+            <input type="radio" name="high-type" value="public" checked>
+            <span>国公立</span>
+          </label>
+          <label class="radio-option">
+            <input type="radio" name="high-type" value="private">
+            <span>私立</span>
+          </label>
+        </div>
       </div>
 
       <div class="section-label">大学・その後</div>
@@ -458,7 +501,6 @@
     // 学年インデックスの定義（0〜15）
     // 0: 未就学, 1-3: 年少〜年長, 4-9: 小1〜小6, 10-12: 中1〜中3, 13-15: 高1〜高3
 
-    // 教育段階ごとの学年インデックス範囲
     var stageRanges = {
       kindergarten: { start: 1, end: 3, label: "幼稚園" },
       elementary:   { start: 4, end: 9, label: "小学校" },
@@ -466,7 +508,6 @@
       high_school:  { start: 13, end: 15, label: "高校" }
     };
 
-    // 年間教育費モデル（1年あたり／円、ざっくり）
     var costModel = {
       kindergarten: {
         public: 300000,
@@ -501,7 +542,6 @@
       }
     };
 
-    // 塾・習い事などの追加モデル（月額と学年範囲）
     var extrasModel = {
       jukuElem: {
         label: "小学生の塾（小5〜小6）",
@@ -559,7 +599,6 @@
       return end - currentIndex + 1;
     }
 
-    // extras用の残り年数計算
     function calcRemainingYearsForExtras(currentIndex, startIndex, endIndex) {
       if (currentIndex > endIndex) {
         return 0;
@@ -570,12 +609,10 @@
       return endIndex - currentIndex + 1;
     }
 
-    // 合計教育費を計算
     function calculateEducationCost(currentIndex, config, advancedFlags) {
       var breakdown = [];
       var total = 0;
 
-      // 幼稚園〜高校（残り年数のみ）
       var stages = [
         { key: "kindergarten", typeKey: "kindergartenType", label: "幼稚園" },
         { key: "elementary",   typeKey: "elementaryType",   label: "小学校" },
@@ -585,7 +622,7 @@
 
       for (var i = 0; i < stages.length; i++) {
         var stage = stages[i];
-        var schoolType = config[stage.typeKey]; // public / private
+        var schoolType = config[stage.typeKey];
         if (!schoolType || schoolType === "none") continue;
 
         var years = calcRemainingYearsForStage(currentIndex, stage.key);
@@ -603,7 +640,6 @@
         });
       }
 
-      // 大学（学部）: これからフル4年在学する想定（大学に進学する場合）
       var univType = config.universityType;
       if (univType && univType !== "none") {
         var univYears = 4;
@@ -623,7 +659,6 @@
           subtotal: subtotalUniv
         });
 
-        // 大学期間の一人暮らし費
         var livingType = config.livingType || "home";
         var livingAnnual = costModel.living[livingType] || 0;
         if (livingAnnual > 0) {
@@ -643,7 +678,6 @@
         }
       }
 
-      // 大学院
       if (config.includeGraduate && univType && univType !== "none") {
         var gradYears = 2;
         var gradAnnual = costModel.graduate[univType];
@@ -676,7 +710,6 @@
         }
       }
 
-      // 追加オプション（塾・予備校・習い事）
       if (advancedFlags && advancedFlags.jukuElem) {
         var e1 = extrasModel.jukuElem;
         var years1 = calcRemainingYearsForExtras(currentIndex, e1.startIndex, e1.endIndex);
@@ -712,187 +745,4 @@
         var years3 = calcRemainingYearsForExtras(currentIndex, e3.startIndex, e3.endIndex);
         if (years3 > 0) {
           var annual3 = e3.monthly * 12;
-          var subtotal3 = annual3 * years3;
-          total += subtotal3;
-          breakdown.push({
-            label: e3.label,
-            years: years3,
-            annual: annual3,
-            subtotal: subtotal3
-          });
-        }
-      }
-      if (advancedFlags && advancedFlags.lessons) {
-        var e4 = extrasModel.lessons;
-        var years4 = calcRemainingYearsForExtras(currentIndex, e4.startIndex, e4.endIndex);
-        if (years4 > 0) {
-          var annual4 = e4.monthly * 12;
-          var subtotal4 = annual4 * years4;
-          total += subtotal4;
-          breakdown.push({
-            label: e4.label,
-            years: years4,
-            annual: annual4,
-            subtotal: subtotal4
-          });
-        }
-      }
-
-      return { total: total, breakdown: breakdown };
-    }
-
-    function formatManYen(amount) {
-      var man = amount / 10000;
-      return man.toLocaleString("ja-JP", { maximumFractionDigits: 1 }) + "万円";
-    }
-
-    function showError(message) {
-      var errorArea = document.getElementById("error-area");
-      if (!message) {
-        errorArea.style.display = "none";
-        errorArea.textContent = "";
-      } else {
-        errorArea.style.display = "block";
-        errorArea.textContent = message;
-      }
-    }
-
-    function handleCalculate() {
-      var nameInput = document.getElementById("child-name");
-      var gradeSelect = document.getElementById("current-grade");
-      var resultCard = document.getElementById("result-card");
-      var resultMainText = document.getElementById("result-main-text");
-      var resultSubText = document.getElementById("result-sub-text");
-      var breakdownTableBody = document.querySelector("#breakdown-table tbody");
-
-      var rawName = nameInput.value.trim();
-      var childName = rawName || "子ども1";
-
-      var gradeValue = gradeSelect.value;
-      if (!gradeValue) {
-        showError("今の学年を選択してください。");
-        resultCard.style.display = "none";
-        return;
-      }
-      var currentIndex = parseInt(gradeValue, 10);
-
-      showError("");
-
-      // 学校種別
-      var config = {
-        kindergartenType: document.getElementById("sel-kindergarten").value,
-        elementaryType:   document.getElementById("sel-elementary").value,
-        juniorHighType:   document.getElementById("sel-junior").value,
-        highSchoolType:   document.getElementById("sel-high").value,
-        universityType:   document.getElementById("sel-university").value,
-        livingType:       document.getElementById("sel-living").value,
-        includeGraduate:  document.getElementById("sel-grad").value === "yes"
-      };
-
-      // juniorHighType / highSchoolType は内部名に合わせる
-      config.juniorHighType = config.juniorHighType;
-      config.highSchoolType = config.highSchoolType;
-
-      var advancedFlags = {
-        jukuElem: document.getElementById("opt-juku-elem").checked,
-        jukuJh:   document.getElementById("opt-juku-jh").checked,
-        yobikou:  document.getElementById("opt-yobikou").checked,
-        lessons:  document.getElementById("opt-lessons").checked
-      };
-
-      var result = calculateEducationCost(currentIndex, {
-        kindergartenType: config.kindergartenType,
-        elementaryType: config.elementaryType,
-        juniorHighType: config.juniorHighType,
-        highSchoolType: config.highSchoolType,
-        universityType: config.universityType,
-        livingType: config.livingType,
-        includeGraduate: config.includeGraduate
-      }, advancedFlags);
-
-      var total = result.total;
-      var breakdown = result.breakdown;
-
-      resultMainText.innerHTML =
-        '<span class="result-name">' + childName +
-        '</span>がこれから進学した場合の教育費は、' +
-        '<span class="result-highlight">約 ' + formatManYen(total) +
-        '</span>程度と試算されます。';
-
-      // サマリー文（進路の簡易表示）
-      var summaryParts = [];
-
-      summaryParts.push("幼稚園〜高校：" +
-        (config.kindergartenType === "public" ? "幼" : "幼私") + "〜" +
-        (config.highSchoolType === "public" ? "高公立" : "高私立") + "イメージ");
-
-      if (config.universityType === "none") {
-        summaryParts.push("大学：進学しない想定");
-      } else if (config.universityType === "national") {
-        summaryParts.push("大学：国公立");
-      } else if (config.universityType === "private_arts") {
-        summaryParts.push("大学：私立文系");
-      } else if (config.universityType === "private_science") {
-        summaryParts.push("大学：私立理系");
-      }
-
-      if (config.universityType !== "none") {
-        if (config.livingType === "home") {
-          summaryParts.push("居住：自宅通学");
-        } else if (config.livingType === "local_rent") {
-          summaryParts.push("居住：地方都市一人暮らし");
-        } else if (config.livingType === "tokyo_rent") {
-          summaryParts.push("居住：首都圏一人暮らし");
-        }
-      }
-
-      if (config.includeGraduate) {
-        summaryParts.push("大学院：進学あり（2年）");
-      } else {
-        summaryParts.push("大学院：進学なし");
-      }
-
-      resultSubText.textContent = summaryParts.join(" / ");
-
-      // 内訳テーブル
-      breakdownTableBody.innerHTML = "";
-      if (!breakdown || breakdown.length === 0) {
-        var trEmpty = document.createElement("tr");
-        var tdEmpty = document.createElement("td");
-        tdEmpty.colSpan = 4;
-        tdEmpty.style.textAlign = "center";
-        tdEmpty.textContent = "これからかかる教育費は、選択された条件ではほとんどありません。";
-        trEmpty.appendChild(tdEmpty);
-        breakdownTableBody.appendChild(trEmpty);
-      } else {
-        for (var i = 0; i < breakdown.length; i++) {
-          var row = breakdown[i];
-          var tr = document.createElement("tr");
-
-          var tdLabel = document.createElement("td");
-          tdLabel.textContent = row.label;
-
-          var tdYears = document.createElement("td");
-          tdYears.textContent = row.years ? (row.years + "年") : "";
-
-          var tdAnnual = document.createElement("td");
-          tdAnnual.textContent = row.annual ? formatManYen(row.annual) : "";
-
-          var tdSubtotal = document.createElement("td");
-          tdSubtotal.textContent = formatManYen(row.subtotal);
-
-          tr.appendChild(tdLabel);
-          tr.appendChild(tdYears);
-          tr.appendChild(tdAnnual);
-          tr.appendChild(tdSubtotal);
-
-          breakdownTableBody.appendChild(tr);
-        }
-      }
-
-      resultCard.style.display = "block";
-      resultCard.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  </script>
-</body>
-</html>
+          var subtotal3 = annual3 * y
