@@ -726,4 +726,32 @@
         breakdownTableBody.appendChild(tr);
       } else {
         breakdown.forEach(function(row) {
-          const tr = docum
+          const tr = document.createElement("tr");
+
+          const tdLabel = document.createElement("td");
+          tdLabel.textContent = row.label;
+
+          const tdYears = document.createElement("td");
+          tdYears.textContent = row.years + "年";
+
+          const tdAnnual = document.createElement("td");
+          tdAnnual.textContent = formatManYen(row.annual);
+
+          const tdSubtotal = document.createElement("td");
+          tdSubtotal.textContent = formatManYen(row.subtotal);
+
+          tr.appendChild(tdLabel);
+          tr.appendChild(tdYears);
+          tr.appendChild(tdAnnual);
+          tr.appendChild(tdSubtotal);
+
+          breakdownTableBody.appendChild(tr);
+        });
+      }
+
+      resultCard.style.display = "block";
+      resultCard.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  </script>
+</body>
+</html>
