@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>教育費シミュレーター（1人＋プリセット版MVP）</title>
+  <title>教育費シミュレーター</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
@@ -81,7 +81,6 @@
     }
 
     input[type="text"],
-    input[type="number"],
     select {
       width: 100%;
       padding: 10px 12px;
@@ -93,50 +92,33 @@
     }
 
     input[type="text"]:focus,
-    input[type="number"]:focus,
     select:focus {
       border-color: var(--primary);
       box-shadow: 0 0 0 2px var(--primary-light);
       background-color: #ffffff;
     }
 
-    .preset-list {
+    .grade-row {
       display: flex;
-      flex-direction: column;
-      gap: 8px;
-      max-height: 260px;
-      overflow-y: auto;
-      padding-right: 4px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
     }
 
-    .preset-item {
-      border-radius: 10px;
-      border: 1px solid var(--border-soft);
-      padding: 8px 10px;
-      display: flex;
-      gap: 8px;
-      align-items: flex-start;
-      background-color: #fafafa;
+    .grade-row-label {
+      font-size: 0.85rem;
+      min-width: 60px;
     }
 
-    .preset-item input[type="radio"] {
-      margin-top: 4px;
-    }
-
-    .preset-main {
+    .grade-row select {
       flex: 1;
     }
 
-    .preset-label {
-      font-size: 0.85rem;
+    .section-label {
+      font-size: 0.9rem;
       font-weight: 600;
-      margin-bottom: 2px;
-    }
-
-    .preset-desc {
-      font-size: 0.75rem;
-      color: var(--text-sub);
-      line-height: 1.4;
+      margin: 12px 0 6px;
     }
 
     .error-message {
@@ -161,6 +143,50 @@
     .btn-primary:active {
       transform: translateY(1px);
       box-shadow: 0 2px 6px rgba(0,0,0,0.12) inset;
+    }
+
+    .btn-secondary {
+      width: 100%;
+      border-radius: 999px;
+      border: 1px solid var(--border-soft);
+      background-color: #ffffff;
+      padding: 10px;
+      font-size: 0.85rem;
+      color: var(--text-sub);
+      cursor: pointer;
+      margin-top: 4px;
+    }
+
+    .btn-secondary-pressed {
+      border-color: var(--primary);
+      color: var(--primary);
+      background-color: #f3f7ff;
+    }
+
+    .advanced-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid var(--border-soft);
+      background-color: #fafafa;
+      margin-bottom: 8px;
+    }
+
+    .advanced-item input[type="checkbox"] {
+      margin-top: 4px;
+    }
+
+    .advanced-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .advanced-desc {
+      font-size: 0.75rem;
+      color: var(--text-sub);
+      line-height: 1.4;
     }
 
     .result-main {
@@ -232,12 +258,12 @@
     <header>
       <h1>教育費シミュレーター</h1>
       <p class="subtitle">
-        1人の進路モデル（公立/私立・文理・一人暮らしなど）を選ぶだけで、<br>
+        幼稚園〜高校の公立・私立、大学の種類・一人暮らしなどを選ぶだけで、<br>
         これからかかる教育費をざっくり試算します。
       </p>
     </header>
 
-    <!-- 入力カード -->
+    <!-- 基本情報 -->
     <section class="card" id="input-card">
       <div class="card-title">子どもの基本情報</div>
 
@@ -274,87 +300,131 @@
       </div>
     </section>
 
-    <!-- プリセット選択カード -->
+    <!-- 進路選択 -->
     <section class="card">
-      <div class="card-title">進路モデル（プリセット）</div>
-      <p class="form-helper" style="margin-bottom: 8px;">
-        ざっくり近いイメージの進路を選んでください。あとから費用モデルの中身は調整可能です（コード上のテーブルを書き換え）。
-      </p>
+      <div class="card-title">進路の想定</div>
 
-      <div class="preset-list" id="preset-list">
-        <label class="preset-item">
-          <input type="radio" name="preset" value="public_home">
-          <div class="preset-main">
-            <div class="preset-label">幼〜高オール公立＋国公立大（自宅）</div>
-            <div class="preset-desc">
-              幼稚園から高校まで国公立が中心、大学は国公立、すべて自宅通学のモデルです。
-            </div>
-          </div>
-        </label>
+      <div class="section-label">幼稚園〜高校（学校種別）</div>
 
-        <label class="preset-item">
-          <input type="radio" name="preset" value="high_private_home">
-          <div class="preset-main">
-            <div class="preset-label">高校のみ私立＋国公立大（自宅）</div>
-            <div class="preset-desc">
-              幼〜中は公立、高校から私立、大学は国公立（自宅通学）のモデルです。
-            </div>
-          </div>
-        </label>
-
-        <label class="preset-item">
-          <input type="radio" name="preset" value="univ_private_arts_home">
-          <div class="preset-main">
-            <div class="preset-label">高校まで公立＋私立文系大（自宅）</div>
-            <div class="preset-desc">
-              幼〜高は公立で、大学から私立文系、自宅通学のモデルです。
-            </div>
-          </div>
-        </label>
-
-        <label class="preset-item">
-          <input type="radio" name="preset" value="univ_private_sci_home">
-          <div class="preset-main">
-            <div class="preset-label">高校まで公立＋私立理系大（自宅）</div>
-            <div class="preset-desc">
-              幼〜高は公立で、大学から私立理系、自宅通学のモデルです。
-            </div>
-          </div>
-        </label>
-
-        <label class="preset-item">
-          <input type="radio" name="preset" value="ichkan_private_arts_home">
-          <div class="preset-main">
-            <div class="preset-label">中高一貫私立＋私立文系大（自宅）</div>
-            <div class="preset-desc">
-              中学から私立一貫校に進学し、大学は私立文系（自宅通学）のモデルです。
-            </div>
-          </div>
-        </label>
-
-        <label class="preset-item">
-          <input type="radio" name="preset" value="univ_private_arts_tokyo">
-          <div class="preset-main">
-            <div class="preset-label">高校まで公立＋私立文系大（首都圏一人暮らし）</div>
-            <div class="preset-desc">
-              高校までは公立、大学から私立文系で、首都圏で一人暮らしをするモデルです。
-            </div>
-          </div>
-        </label>
-
-        <label class="preset-item">
-          <input type="radio" name="preset" value="univ_private_sci_tokyo_grad">
-          <div class="preset-main">
-            <div class="preset-label">高校まで公立＋私立理系大＋大学院（首都圏一人暮らし）</div>
-            <div class="preset-desc">
-              高校まで公立、大学は私立理系、大学院まで進学し、首都圏で一人暮らしをするモデルです。
-            </div>
-          </div>
-        </label>
+      <div class="grade-row">
+        <div class="grade-row-label">幼稚園</div>
+        <select id="sel-kindergarten">
+          <option value="public">国公立</option>
+          <option value="private">私立</option>
+        </select>
       </div>
 
-      <!-- onclickで直接ハンドラを呼ぶ -->
-      <button class="btn-primary" id="calc-btn" onclick="handleCalculate()">教育費を試算する</button>
+      <div class="grade-row">
+        <div class="grade-row-label">小学校</div>
+        <select id="sel-elementary">
+          <option value="public">国公立</option>
+          <option value="private">私立</option>
+        </select>
+      </div>
+
+      <div class="grade-row">
+        <div class="grade-row-label">中学校</div>
+        <select id="sel-junior">
+          <option value="public">国公立</option>
+          <option value="private">私立</option>
+        </select>
+      </div>
+
+      <div class="grade-row">
+        <div class="grade-row-label">高校</div>
+        <select id="sel-high">
+          <option value="public">国公立</option>
+          <option value="private">私立</option>
+        </select>
+      </div>
+
+      <div class="section-label">大学・その後</div>
+
+      <div class="form-group">
+        <label for="sel-university">大学の進路</label>
+        <select id="sel-university">
+          <option value="none">大学には進学しない（専門・就職など）</option>
+          <option value="national">国公立大学</option>
+          <option value="private_arts">私立大学（文系）</option>
+          <option value="private_science">私立大学（理系）</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="sel-living">大学在学中の居住</label>
+        <select id="sel-living">
+          <option value="home">自宅から通学</option>
+          <option value="local_rent">地方都市で一人暮らし</option>
+          <option value="tokyo_rent">首都圏で一人暮らし</option>
+        </select>
+        <div class="form-helper">大学に進学しない場合、この設定は無視されます。</div>
+      </div>
+
+      <div class="form-group">
+        <label for="sel-grad">大学院進学</label>
+        <select id="sel-grad">
+          <option value="no">大学院には進学しない</option>
+          <option value="yes">大学院まで進学する（2年）</option>
+        </select>
+      </div>
+
+      <!-- 詳細オプションのトグルボタン -->
+      <button type="button" class="btn-secondary" id="toggle-advanced-btn" onclick="toggleAdvanced()">
+        さらに詳しく（塾・習い事など）を設定する
+      </button>
+    </section>
+
+    <!-- 詳細オプション（折りたたみ） -->
+    <section class="card" id="advanced-card" style="display:none;">
+      <div class="card-title">塾・予備校・習い事（任意）</div>
+      <p class="form-helper" style="margin-bottom: 8px;">
+        金額は一般的な目安で固定しています。チェックすると、その費用を加算します。
+      </p>
+
+      <label class="advanced-item">
+        <input type="checkbox" id="opt-juku-elem">
+        <div>
+          <div class="advanced-label">小学生の塾</div>
+          <div class="advanced-desc">
+            小5〜小6の2年間、月1.5万円程度の通塾を想定（年18万円 × 最大2年程度）。
+          </div>
+        </div>
+      </label>
+
+      <label class="advanced-item">
+        <input type="checkbox" id="opt-juku-jh">
+        <div>
+          <div class="advanced-label">中学生の塾</div>
+          <div class="advanced-desc">
+            中1〜中3の3年間、月2.5万円程度の通塾を想定（年30万円 × 最大3年程度）。
+          </div>
+        </div>
+      </label>
+
+      <label class="advanced-item">
+        <input type="checkbox" id="opt-yobikou">
+        <div>
+          <div class="advanced-label">高校の予備校</div>
+          <div class="advanced-desc">
+            高2〜高3の2年間、月4万円程度の予備校を想定（年48万円 × 最大2年程度）。
+          </div>
+        </div>
+      </label>
+
+      <label class="advanced-item">
+        <input type="checkbox" id="opt-lessons">
+        <div>
+          <div class="advanced-label">習い事（合計）</div>
+          <div class="advanced-desc">
+            小1〜小6の6年間、月1万円程度の習い事を想定（年12万円 × 最大6年程度）。
+          </div>
+        </div>
+      </label>
+    </section>
+
+    <!-- 計算ボタン -->
+    <section class="card">
+      <button class="btn-primary" onclick="handleCalculate()">教育費を試算する</button>
     </section>
 
     <!-- 結果カード -->
@@ -379,7 +449,7 @@
 
       <p class="result-note">
         ・上記はあくまで目安のモデルです。地域・学校・進路によって大きく変動します。<br>
-        ・幼児教育・学校教育費の平均値や一人暮らし費用のざっくり相場を元に、便宜的なモデルとして設定しています。
+        ・幼児〜高校の学校教育費、および塾・習い事・一人暮らし費用の一般的な水準を参考に、便宜的なモデルとして設定しています。
       </p>
     </section>
   </div>
@@ -389,17 +459,15 @@
     // 0: 未就学, 1-3: 年少〜年長, 4-9: 小1〜小6, 10-12: 中1〜中3, 13-15: 高1〜高3
 
     // 教育段階ごとの学年インデックス範囲
-    const stageRanges = {
+    var stageRanges = {
       kindergarten: { start: 1, end: 3, label: "幼稚園" },
-      elementary: { start: 4, end: 9, label: "小学校" },
-      junior_high: { start: 10, end: 12, label: "中学校" },
-      high_school: { start: 13, end: 15, label: "高校" },
-      university: { start: 16, end: 19, label: "大学（学部）" },
-      graduate: { start: 20, end: 21, label: "大学院" }
+      elementary:   { start: 4, end: 9, label: "小学校" },
+      junior_high:  { start: 10, end: 12, label: "中学校" },
+      high_school:  { start: 13, end: 15, label: "高校" }
     };
 
-    // 年間教育費モデル（ざっくり・1年あたり／円）
-    const costModel = {
+    // 年間教育費モデル（1年あたり／円、ざっくり）
+    var costModel = {
       kindergarten: {
         public: 300000,
         private: 600000
@@ -433,104 +501,54 @@
       }
     };
 
-    // プリセット定義
-    const presets = {
-      public_home: {
-        label: "幼〜高オール公立＋国公立大（自宅）",
-        config: {
-          kindergartenType: "public",
-          elementaryType: "public",
-          juniorHighType: "public",
-          highSchoolType: "public",
-          universityType: "national",
-          includeGraduate: false,
-          livingType: "home"
-        }
+    // 塾・習い事などの追加モデル（月額と学年範囲）
+    var extrasModel = {
+      jukuElem: {
+        label: "小学生の塾（小5〜小6）",
+        monthly: 15000,
+        startIndex: 8,  // 小5
+        endIndex: 9     // 小6
       },
-      high_private_home: {
-        label: "高校のみ私立＋国公立大（自宅）",
-        config: {
-          kindergartenType: "public",
-          elementaryType: "public",
-          juniorHighType: "public",
-          highSchoolType: "private",
-          universityType: "national",
-          includeGraduate: false,
-          livingType: "home"
-        }
+      jukuJh: {
+        label: "中学生の塾（中1〜中3）",
+        monthly: 25000,
+        startIndex: 10, // 中1
+        endIndex: 12    // 中3
       },
-      univ_private_arts_home: {
-        label: "高校まで公立＋私立文系大（自宅）",
-        config: {
-          kindergartenType: "public",
-          elementaryType: "public",
-          juniorHighType: "public",
-          highSchoolType: "public",
-          universityType: "private_arts",
-          includeGraduate: false,
-          livingType: "home"
-        }
+      yobikou: {
+        label: "高校の予備校（高2〜高3）",
+        monthly: 40000,
+        startIndex: 14, // 高2
+        endIndex: 15    // 高3
       },
-      univ_private_sci_home: {
-        label: "高校まで公立＋私立理系大（自宅）",
-        config: {
-          kindergartenType: "public",
-          elementaryType: "public",
-          juniorHighType: "public",
-          highSchoolType: "public",
-          universityType: "private_science",
-          includeGraduate: false,
-          livingType: "home"
-        }
-      },
-      ichkan_private_arts_home: {
-        label: "中高一貫私立＋私立文系大（自宅）",
-        config: {
-          kindergartenType: "public",
-          elementaryType: "public",
-          juniorHighType: "private",
-          highSchoolType: "private",
-          universityType: "private_arts",
-          includeGraduate: false,
-          livingType: "home"
-        }
-      },
-      univ_private_arts_tokyo: {
-        label: "高校まで公立＋私立文系大（首都圏一人暮らし）",
-        config: {
-          kindergartenType: "public",
-          elementaryType: "public",
-          juniorHighType: "public",
-          highSchoolType: "public",
-          universityType: "private_arts",
-          includeGraduate: false,
-          livingType: "tokyo_rent"
-        }
-      },
-      univ_private_sci_tokyo_grad: {
-        label: "高校まで公立＋私立理系大＋大学院（首都圏一人暮らし）",
-        config: {
-          kindergartenType: "public",
-          elementaryType: "public",
-          juniorHighType: "public",
-          highSchoolType: "public",
-          universityType: "private_science",
-          includeGraduate: true,
-          livingType: "tokyo_rent"
-        }
+      lessons: {
+        label: "習い事（小1〜小6）",
+        monthly: 10000,
+        startIndex: 4,  // 小1
+        endIndex: 9     // 小6
       }
     };
 
-    // 残り年数を計算
+    function toggleAdvanced() {
+      var card = document.getElementById("advanced-card");
+      var btn = document.getElementById("toggle-advanced-btn");
+      if (card.style.display === "none" || card.style.display === "") {
+        card.style.display = "block";
+        btn.classList.add("btn-secondary-pressed");
+        btn.textContent = "詳細設定を閉じる";
+      } else {
+        card.style.display = "none";
+        btn.classList.remove("btn-secondary-pressed");
+        btn.textContent = "さらに詳しく（塾・習い事など）を設定する";
+      }
+    }
+
     function calcRemainingYearsForStage(currentIndex, stageKey) {
-      const stage = stageRanges[stageKey];
+      var stage = stageRanges[stageKey];
       if (!stage) return 0;
 
-      const start = stage.start;
-      const end = stage.end;
-
-      // 大学・大学院はここでは扱わない
-      if (stageKey === "university" || stageKey === "graduate") return 0;
+      var start = stage.start;
+      var end = stage.end;
 
       if (currentIndex < start) {
         return end - start + 1;
@@ -541,28 +559,40 @@
       return end - currentIndex + 1;
     }
 
-    // 合計教育費を計算
-    function calculateEducationCost(currentIndex, presetConfig) {
-      const breakdown = [];
-      let total = 0;
+    // extras用の残り年数計算
+    function calcRemainingYearsForExtras(currentIndex, startIndex, endIndex) {
+      if (currentIndex > endIndex) {
+        return 0;
+      }
+      if (currentIndex <= startIndex) {
+        return endIndex - startIndex + 1;
+      }
+      return endIndex - currentIndex + 1;
+    }
 
-      const stages = [
-        { key: "kindergarten", typeKey: "kindergartenType", label: "幼稚園" },
-        { key: "elementary", typeKey: "elementaryType", label: "小学校" },
-        { key: "junior_high", typeKey: "juniorHighType", label: "中学校" },
-        { key: "high_school", typeKey: "highSchoolType", label: "高校" }
-      ];
+    // 合計教育費を計算
+    function calculateEducationCost(currentIndex, config, advancedFlags) {
+      var breakdown = [];
+      var total = 0;
 
       // 幼稚園〜高校（残り年数のみ）
-      stages.forEach(stage => {
-        const schoolType = presetConfig[stage.typeKey]; // public / private
-        if (!schoolType || schoolType === "none") return;
+      var stages = [
+        { key: "kindergarten", typeKey: "kindergartenType", label: "幼稚園" },
+        { key: "elementary",   typeKey: "elementaryType",   label: "小学校" },
+        { key: "junior_high",  typeKey: "juniorHighType",   label: "中学校" },
+        { key: "high_school",  typeKey: "highSchoolType",   label: "高校" }
+      ];
 
-        const years = calcRemainingYearsForStage(currentIndex, stage.key);
-        if (years <= 0) return;
+      for (var i = 0; i < stages.length; i++) {
+        var stage = stages[i];
+        var schoolType = config[stage.typeKey]; // public / private
+        if (!schoolType || schoolType === "none") continue;
 
-        const annual = costModel[stage.key][schoolType];
-        const subtotal = annual * years;
+        var years = calcRemainingYearsForStage(currentIndex, stage.key);
+        if (years <= 0) continue;
+
+        var annual = costModel[stage.key][schoolType];
+        var subtotal = annual * years;
         total += subtotal;
 
         breakdown.push({
@@ -571,17 +601,17 @@
           annual: annual,
           subtotal: subtotal
         });
-      });
+      }
 
-      // 大学（学部）: これからフル4年在学する想定
-      const univType = presetConfig.universityType;
+      // 大学（学部）: これからフル4年在学する想定（大学に進学する場合）
+      var univType = config.universityType;
       if (univType && univType !== "none") {
-        const univYears = 4;
-        const annualUniv = costModel.university[univType];
-        const subtotalUniv = annualUniv * univYears;
+        var univYears = 4;
+        var annualUniv = costModel.university[univType];
+        var subtotalUniv = annualUniv * univYears;
         total += subtotalUniv;
 
-        let labelUniType = "";
+        var labelUniType = "";
         if (univType === "national") labelUniType = "国公立";
         if (univType === "private_arts") labelUniType = "私立文系";
         if (univType === "private_science") labelUniType = "私立理系";
@@ -594,14 +624,15 @@
         });
 
         // 大学期間の一人暮らし費
-        const livingType = presetConfig.livingType || "home";
-        const livingAnnual = costModel.living[livingType] || 0;
+        var livingType = config.livingType || "home";
+        var livingAnnual = costModel.living[livingType] || 0;
         if (livingAnnual > 0) {
-          const livingSubtotal = livingAnnual * univYears;
+          var livingSubtotal = livingAnnual * univYears;
           total += livingSubtotal;
 
-          let livingLabel = "一人暮らし費（大学在学中）";
+          var livingLabel = "一人暮らし費（大学在学中）";
           if (livingType === "tokyo_rent") livingLabel = "首都圏一人暮らし費（大学在学中）";
+          if (livingType === "local_rent") livingLabel = "地方都市一人暮らし費（大学在学中）";
 
           breakdown.push({
             label: livingLabel,
@@ -613,10 +644,10 @@
       }
 
       // 大学院
-      if (presetConfig.includeGraduate && univType && univType !== "none") {
-        const gradYears = 2;
-        const gradAnnual = costModel.graduate[univType];
-        const gradSubtotal = gradAnnual * gradYears;
+      if (config.includeGraduate && univType && univType !== "none") {
+        var gradYears = 2;
+        var gradAnnual = costModel.graduate[univType];
+        var gradSubtotal = gradAnnual * gradYears;
         total += gradSubtotal;
 
         breakdown.push({
@@ -626,14 +657,15 @@
           subtotal: gradSubtotal
         });
 
-        const livingTypeGrad = presetConfig.livingType || "home";
-        const livingAnnualGrad = costModel.living[livingTypeGrad] || 0;
+        var livingTypeGrad = config.livingType || "home";
+        var livingAnnualGrad = costModel.living[livingTypeGrad] || 0;
         if (livingAnnualGrad > 0) {
-          const livingSubtotalGrad = livingAnnualGrad * gradYears;
+          var livingSubtotalGrad = livingAnnualGrad * gradYears;
           total += livingSubtotalGrad;
 
-          let livingLabelGrad = "一人暮らし費（大学院）";
+          var livingLabelGrad = "一人暮らし費（大学院）";
           if (livingTypeGrad === "tokyo_rent") livingLabelGrad = "首都圏一人暮らし費（大学院）";
+          if (livingTypeGrad === "local_rent") livingLabelGrad = "地方都市一人暮らし費（大学院）";
 
           breakdown.push({
             label: livingLabelGrad,
@@ -644,11 +676,69 @@
         }
       }
 
-      return { total: total, breakdown: breakdown };
-    }
+      // 追加オプション（塾・予備校・習い事）
+      if (advancedFlags && advancedFlags.jukuElem) {
+        var e1 = extrasModel.jukuElem;
+        var years1 = calcRemainingYearsForExtras(currentIndex, e1.startIndex, e1.endIndex);
+        if (years1 > 0) {
+          var annual1 = e1.monthly * 12;
+          var subtotal1 = annual1 * years1;
+          total += subtotal1;
+          breakdown.push({
+            label: e1.label,
+            years: years1,
+            annual: annual1,
+            subtotal: subtotal1
+          });
+        }
+      }
+      if (advancedFlags && advancedFlags.jukuJh) {
+        var e2 = extrasModel.jukuJh;
+        var years2 = calcRemainingYearsForExtras(currentIndex, e2.startIndex, e2.endIndex);
+        if (years2 > 0) {
+          var annual2 = e2.monthly * 12;
+          var subtotal2 = annual2 * years2;
+          total += subtotal2;
+          breakdown.push({
+            label: e2.label,
+            years: years2,
+            annual: annual2,
+            subtotal: subtotal2
+          });
+        }
+      }
+      if (advancedFlags && advancedFlags.yobikou) {
+        var e3 = extrasModel.yobikou;
+        var years3 = calcRemainingYearsForExtras(currentIndex, e3.startIndex, e3.endIndex);
+        if (years3 > 0) {
+          var annual3 = e3.monthly * 12;
+          var subtotal3 = annual3 * years3;
+          total += subtotal3;
+          breakdown.push({
+            label: e3.label,
+            years: years3,
+            annual: annual3,
+            subtotal: subtotal3
+          });
+        }
+      }
+      if (advancedFlags && advancedFlags.lessons) {
+        var e4 = extrasModel.lessons;
+        var years4 = calcRemainingYearsForExtras(currentIndex, e4.startIndex, e4.endIndex);
+        if (years4 > 0) {
+          var annual4 = e4.monthly * 12;
+          var subtotal4 = annual4 * years4;
+          total += subtotal4;
+          breakdown.push({
+            label: e4.label,
+            years: years4,
+            annual: annual4,
+            subtotal: subtotal4
+          });
+        }
+      }
 
-    function formatYen(amount) {
-      return amount.toLocaleString("ja-JP") + "円";
+      return { total: total, breakdown: breakdown };
     }
 
     function formatManYen(amount) {
@@ -657,7 +747,7 @@
     }
 
     function showError(message) {
-      const errorArea = document.getElementById("error-area");
+      var errorArea = document.getElementById("error-area");
       if (!message) {
         errorArea.style.display = "none";
         errorArea.textContent = "";
@@ -668,44 +758,60 @@
     }
 
     function handleCalculate() {
-      const nameInput = document.getElementById("child-name");
-      const gradeSelect = document.getElementById("current-grade");
-      const resultCard = document.getElementById("result-card");
-      const resultMainText = document.getElementById("result-main-text");
-      const resultSubText = document.getElementById("result-sub-text");
-      const breakdownTableBody = document.querySelector("#breakdown-table tbody");
+      var nameInput = document.getElementById("child-name");
+      var gradeSelect = document.getElementById("current-grade");
+      var resultCard = document.getElementById("result-card");
+      var resultMainText = document.getElementById("result-main-text");
+      var resultSubText = document.getElementById("result-sub-text");
+      var breakdownTableBody = document.querySelector("#breakdown-table tbody");
 
-      const rawName = nameInput.value.trim();
-      const childName = rawName || "子ども1";
+      var rawName = nameInput.value.trim();
+      var childName = rawName || "子ども1";
 
-      const gradeValue = gradeSelect.value;
+      var gradeValue = gradeSelect.value;
       if (!gradeValue) {
         showError("今の学年を選択してください。");
         resultCard.style.display = "none";
         return;
       }
-      const currentIndex = parseInt(gradeValue, 10);
-
-      const presetRadio = document.querySelector("input[name='preset']:checked");
-      if (!presetRadio) {
-        showError("進路モデル（プリセット）を1つ選択してください。");
-        resultCard.style.display = "none";
-        return;
-      }
-
-      const presetKey = presetRadio.value;
-      const preset = presets[presetKey];
-      if (!preset) {
-        showError("選択されたプリセットの設定が見つかりません。");
-        resultCard.style.display = "none";
-        return;
-      }
+      var currentIndex = parseInt(gradeValue, 10);
 
       showError("");
 
-      const result = calculateEducationCost(currentIndex, preset.config);
-      const total = result.total;
-      const breakdown = result.breakdown;
+      // 学校種別
+      var config = {
+        kindergartenType: document.getElementById("sel-kindergarten").value,
+        elementaryType:   document.getElementById("sel-elementary").value,
+        juniorHighType:   document.getElementById("sel-junior").value,
+        highSchoolType:   document.getElementById("sel-high").value,
+        universityType:   document.getElementById("sel-university").value,
+        livingType:       document.getElementById("sel-living").value,
+        includeGraduate:  document.getElementById("sel-grad").value === "yes"
+      };
+
+      // juniorHighType / highSchoolType は内部名に合わせる
+      config.juniorHighType = config.juniorHighType;
+      config.highSchoolType = config.highSchoolType;
+
+      var advancedFlags = {
+        jukuElem: document.getElementById("opt-juku-elem").checked,
+        jukuJh:   document.getElementById("opt-juku-jh").checked,
+        yobikou:  document.getElementById("opt-yobikou").checked,
+        lessons:  document.getElementById("opt-lessons").checked
+      };
+
+      var result = calculateEducationCost(currentIndex, {
+        kindergartenType: config.kindergartenType,
+        elementaryType: config.elementaryType,
+        juniorHighType: config.juniorHighType,
+        highSchoolType: config.highSchoolType,
+        universityType: config.universityType,
+        livingType: config.livingType,
+        includeGraduate: config.includeGraduate
+      }, advancedFlags);
+
+      var total = result.total;
+      var breakdown = result.breakdown;
 
       resultMainText.innerHTML =
         '<span class="result-name">' + childName +
@@ -713,31 +819,66 @@
         '<span class="result-highlight">約 ' + formatManYen(total) +
         '</span>程度と試算されます。';
 
-      resultSubText.textContent = "モデル：" + preset.label;
+      // サマリー文（進路の簡易表示）
+      var summaryParts = [];
 
-      breakdownTableBody.innerHTML = "";
-      if (breakdown.length === 0) {
-        const tr = document.createElement("tr");
-        const td = document.createElement("td");
-        td.colSpan = 4;
-        td.style.textAlign = "center";
-        td.textContent = "これからかかる教育費は、選択された条件ではありません。";
-        tr.appendChild(td);
-        breakdownTableBody.appendChild(tr);
+      summaryParts.push("幼稚園〜高校：" +
+        (config.kindergartenType === "public" ? "幼" : "幼私") + "〜" +
+        (config.highSchoolType === "public" ? "高公立" : "高私立") + "イメージ");
+
+      if (config.universityType === "none") {
+        summaryParts.push("大学：進学しない想定");
+      } else if (config.universityType === "national") {
+        summaryParts.push("大学：国公立");
+      } else if (config.universityType === "private_arts") {
+        summaryParts.push("大学：私立文系");
+      } else if (config.universityType === "private_science") {
+        summaryParts.push("大学：私立理系");
+      }
+
+      if (config.universityType !== "none") {
+        if (config.livingType === "home") {
+          summaryParts.push("居住：自宅通学");
+        } else if (config.livingType === "local_rent") {
+          summaryParts.push("居住：地方都市一人暮らし");
+        } else if (config.livingType === "tokyo_rent") {
+          summaryParts.push("居住：首都圏一人暮らし");
+        }
+      }
+
+      if (config.includeGraduate) {
+        summaryParts.push("大学院：進学あり（2年）");
       } else {
-        breakdown.forEach(function(row) {
-          const tr = document.createElement("tr");
+        summaryParts.push("大学院：進学なし");
+      }
 
-          const tdLabel = document.createElement("td");
+      resultSubText.textContent = summaryParts.join(" / ");
+
+      // 内訳テーブル
+      breakdownTableBody.innerHTML = "";
+      if (!breakdown || breakdown.length === 0) {
+        var trEmpty = document.createElement("tr");
+        var tdEmpty = document.createElement("td");
+        tdEmpty.colSpan = 4;
+        tdEmpty.style.textAlign = "center";
+        tdEmpty.textContent = "これからかかる教育費は、選択された条件ではほとんどありません。";
+        trEmpty.appendChild(tdEmpty);
+        breakdownTableBody.appendChild(trEmpty);
+      } else {
+        for (var i = 0; i < breakdown.length; i++) {
+          var row = breakdown[i];
+          var tr = document.createElement("tr");
+
+          var tdLabel = document.createElement("td");
           tdLabel.textContent = row.label;
 
-          const tdYears = document.createElement("td");
-          tdYears.textContent = row.years + "年";
+          var tdYears = document.createElement("td");
+          tdYears.textContent = row.years ? (row.years + "年") : "";
 
-          const tdAnnual = document.createElement("td");
-          tdAnnual.textContent = formatManYen(row.annual);
+          var tdAnnual = document.createElement("td");
+          tdAnnual.textContent = row.annual ? formatManYen(row.annual) : "";
 
-          const tdSubtotal = document.createElement("td");
+          var tdSubtotal = document.createElement("td");
           tdSubtotal.textContent = formatManYen(row.subtotal);
 
           tr.appendChild(tdLabel);
@@ -746,7 +887,7 @@
           tr.appendChild(tdSubtotal);
 
           breakdownTableBody.appendChild(tr);
-        });
+        }
       }
 
       resultCard.style.display = "block";
