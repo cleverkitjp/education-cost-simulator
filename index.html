@@ -680,3 +680,185 @@
 
       var fallbackLabel = (index + 1) + "人目";
       var displayName = state.nam
+var displayName = state.name || fallbackLabel;
+
+      var card = document.createElement("div");
+      card.className = "card";
+
+      var title = document.createElement("div");
+      title.className = "card-title";
+      title.textContent = displayName + " の試算結果";
+      card.appendChild(title);
+
+      var main = document.createElement("div");
+      main.style.marginBottom = "8px";
+      main.style.lineHeight = "1.5";
+      main.innerHTML =
+        '<span class="result-name">' + displayName +
+        '</span> がこれから進学した場合の教育費は、' +
+        '<span class="result-highlight">約 ' + formatManYen(result.total) +
+        '</span>です。';
+      card.appendChild(main);
+
+      var summaryParts = [];
+      summaryParts.push("幼稚園：" + (state.kindergartenType === "public" ? "公立" : "私立"));
+      summaryParts.push("小学校：" + (state.elementaryType === "public" ? "公立" : "私立"));
+      summaryParts.push("中学校：" + (state.juniorType === "public" ? "公立" : "私立"));
+      summaryParts.push("高校：" + (state.highType === "public" ? "公立" : "私立"));
+
+      if (state.universityType === "none") {
+        summaryParts.push("大学：進学しない想定");
+      } else if (state.universityType === "national") {
+        summaryParts.push("大学：国公立");
+      } else if (state.universityType === "private_arts") {
+        summaryParts.push("大学：私立文系");
+      } else if (state.universityType === "private_science") {
+        summaryParts.push("大学：私立理系");
+      }
+
+      if (state.universityType !== "none") {
+        if (state.livingType === "home") {
+          summaryParts.push("居住：自宅通学");
+        } else if (state.livingType === "local_rent") {
+          summaryParts.push("居住：地方都市一人暮らし");
+        } else if (state.livingType === "tokyo_rent") {
+          summaryParts.push("居住：首都圏一人暮らし");
+        }
+      }
+
+      summaryParts.push("大学院：" + (state.includeGraduate ? "進学あり" : "進学なし"));
+
+      var sub = document.createElement("div");
+      sub.style.fontSize = "13px";
+      sub.style.color = "#666";
+      sub.style.marginBottom = "12px";
+      sub.textContent = summaryParts.join(" / ");
+      card.appendChild(sub);
+
+      var table = document.createElement("table");
+      var thead = document.createElement("thead");
+      thead.innerHTML =
+        '<tr><th>項目</th><th>期間</th><th>年額</th><th>合計</th></tr>';
+      table.appendChild(thead);
+
+      var tbody = document.createElement("tbody");
+      if (!result.breakdown || result.breakdown.length === 0) {
+        var trEmpty = document.createElement("tr");
+        var tdEmpty = document.createElement("td");
+        tdEmpty.colSpan = 4;
+        tdEmpty.style.textAlign = "center";
+        tdEmpty.textContent = "これからかかる教育費は、選択された条件ではほとんどありません。";
+        trEmpty.appendChild(tdEmpty);
+        tbody.appendChild(trEmpty);
+      } else {
+        result.breakdown.forEach(function(row) {
+          var tr = document.createElement("tr");
+
+          var tdLabel = document.createElement("td");
+          tdLabel.textContent = row.label;
+
+          var tdYears = document.createElement("td");
+          tdYears.textContent = row.years ? (row.years + "年") : "";
+
+          var tdAnnual = document.createElement("td");
+          tdAnnual.textContent = row.annual ? formatManYen(row.annual) : "";
+
+          var tdSubtotal = document.createElement("td");
+          tdSubtotal.textContent = formatManYen(row.subtotal);
+
+          tr.appendChild(tdLabel);
+          tr.appendChild(tdYears);
+          tr.appendChild(tdAnnual);
+          tr.appendChild(tdSubtotal);
+
+          tbody.appendChild(tr);
+        });
+      }
+
+      table.appendChild(tbody);
+      card.appendChild(table);
+
+      container.appendChild(card);
+    }
+
+    function handleCalculate() {
+      saveCurrentFormToState();
+
+      var activeState = childStates[activeChildIndex];
+      if (!activeState.gradeValue) {
+        showError("アクティブな子どもの『今の学年』を選択してください。");
+        return;
+      }
+      showError("");
+
+      var familyCard = document.getElementById("family-card");
+      var familyMainText = document.getElementById("family-main-text");
+      var familyTableBody = document.querySelector("#family-table tbody");
+      var childrenContainer = document.getElementById("children-results");
+
+      familyTableBody.innerHTML = "";
+      childrenContainer.innerHTML = "";
+
+      var familyTotal = 0;
+      var childCount = 0;
+
+      for (var i = 0; i < childStates.length; i++) {
+        var st = childStates[i];
+        if (!st.gradeValue) continue;
+
+        childCount++;
+
+        var currentIndex = parseInt(st.gradeValue, 10);
+        var cfg = {
+          kindergartenType: st.kindergartenType,
+          elementaryType: st.elementaryType,
+          juniorType: st.juniorType,
+          highType: st.highType,
+          universityType: st.universityType,
+          livingType: st.livingType,
+          includeGraduate: st.includeGraduate
+        };
+
+        var result = calculateEducationCost(currentIndex, cfg, st.advancedFlags);
+        familyTotal += result.total;
+
+        var fallbackLabel = (i + 1) + "人目";
+        var nameLabel = st.name ? st.name : fallbackLabel;
+
+        var trF = document.createElement("tr");
+        var tdName = document.createElement("td");
+        tdName.textContent = nameLabel;
+
+        var tdTotal = document.createElement("td");
+        tdTotal.textContent = formatManYen(result.total);
+
+        trF.appendChild(tdName);
+        trF.appendChild(tdTotal);
+        familyTableBody.appendChild(trF);
+
+        renderChildResultCard(i, st, result);
+      }
+
+      if (childCount === 0) {
+        showError("今の学年が設定されている子どもがいません。");
+        familyCard.style.display = "none";
+        childrenContainer.innerHTML = "";
+        return;
+      }
+
+      familyMainText.innerHTML =
+        "登録されている " + childCount + "人分の教育費の合計は、" +
+        '<span class="result-highlight">約 ' + formatManYen(familyTotal) + '</span> です。';
+
+      familyCard.style.display = "block";
+      familyCard.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+      initChildStates();
+      updateTabUI();
+      loadStateToForm();
+    });
+    </script>
+</body>
+</html>
